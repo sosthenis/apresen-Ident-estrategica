@@ -1,9 +1,6 @@
 // Preencha as linhas abaixo e salve. Aspas obrigatórias.
 window.IE_CFG = {
-  // Endereço do Firebase Realtime Database (votação pelo celular). Opcional.
-  fb: "",
-  // Endereço público do deck no GitHub Pages (ex.: https://seuusuario.github.io/deck/). Opcional.
-  live: "",
-  // Link do seu projeto no ChatGPT (o assistente tira-dúvidas abre nele). Cole a URL da barra de endereço.
-  bot: ""
+  fb: "https://id-estrategica-default-rtdb.firebaseio.com",
+  live: "https://sosthenis.github.io/apresen-Ident-estrategica/",
+  bot: "COLE_AQUI_O_LINK_DO_PROJETO_DO_CHATGPT"
 };
