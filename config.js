@@ -2,5 +2,5 @@
 window.IE_CFG = {
   fb: "https://id-estrategica-default-rtdb.firebaseio.com",
   live: "https://sosthenis.github.io/apresen-Ident-estrategica/",
-  bot: "COLE_AQUI_O_LINK_DO_PROJETO_DO_CHATGPT"
+  bot: "https://chatgpt.com/g/g-p-6ad1214790e88191803f7b0494180b84/project"
 };
