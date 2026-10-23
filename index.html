@@ -3204,7 +3204,7 @@ const Poll={cfg:null,manual:{},phase:'ask',
  total(i){return (this.manual[i]||0)+(Live.counts[i]||0)},
  ro(){return !!(Live.ready&&!Live.presenter)},
  draw(){const c=this.cfg;if(!c)return;
-  const rev=this.phase==='rev';const ro=this.ro();const tot=c.opts.reduce((s,_,i)=>s+this.total(i),0);const mx=Math.max(1,...c.opts.map((_,i)=>this.total(i)));
+  const rev=this.phase==='rev';const ro=this.ro();const tot=c.opts.reduce((s,_,i)=>s+this.total(i),0);const mx=Math.max(1,...c.opts.map((_,i)=>this.total(i)));if(c.id==='debate-antes'&&!ro)store.set('p_tot_debate-antes',c.opts.map((_,i)=>this.total(i)));
   const opts=c.opts.map((t,i)=>{const n=this.total(i);let cls='opt';if(rev&&c.correct!==undefined)cls+=(i===c.correct?' ok':' no');
    const pct=tot?Math.round(n/tot*100):0;const pv=c.prev?`<div style="font:600 24px var(--bd);color:#9fdce8;margin-top:8px">Antes: ${c.prev[i]||0}</div>`:'';
    return `<button class="${cls}" data-k="${i}"><span class="L">${'ABCD'[i]}</span><div>${t}</div>${pv}<span class="cnt">${rev&&tot?pct+'%':n}</span><span class="bar" style="width:${rev?(n/mx*100):0}%"></span>${rev||ro?'':'<span class="pm"><span data-d="-1">−</span><span data-d="1">+</span></span>'}</button>`}).join('');
@@ -3235,13 +3235,13 @@ function openDilema(o){const d=DIL[o.dil];Poll.open({id:'dil-'+o.dil,kick:'Dilem
 function openDebate(kind){
  const base={kick:'Debate · pergunta central',title:'Mudou ou ampliou?',ctx:'“A identidade estratégica mudou — ou mudou a maneira de expressá-la?”',opts:['A identidade mudou','Mudou a forma de expressar uma finalidade duradoura','Ainda não dá para afirmar: falta evidência de execução']};
  if(kind==='antes')Poll.open({...base,id:'debate-antes',kick:'Debate · pré-voto'});
- else Poll.open({...base,id:'debate-depois',kick:'Debate · pós-voto',prev:store.get('p_debate-antes')||{},ans:'A resposta exige comparação documental e evidências de execução.',ansT:'Síntese do seminário:'});
+ else Poll.open({...base,id:'debate-depois',kick:'Debate · pós-voto',prev:store.get('p_tot_debate-antes')||store.get('p_debate-antes')||{},ans:'A resposta exige comparação documental e evidências de execução.',ansT:'Síntese do seminário:'});
 }
 let gameScore={ok:0,n:0};
 function openGame(){gameScore={ok:0,n:0};gameAsk(0)}
 function gameAsk(i){
  if(i>=GAME.length){const s=gameScore;openOv(panelBase('Jogo · resultado','Evidência ou hipótese?',`<div class="score">${s.ok} / ${s.n}</div><div class="ctx" style="text-align:center">${s.n?'A turma acertou '+s.ok+' de '+s.n+' afirmações votadas.':'Nenhum voto foi registrado.'}<br><small style="color:#9cc3d6">Documentado se prova em documento · Evolução textual se mudou só a redação · A investigar se falta evidência.</small></div>`,`<div class="pbar"><span style="margin-left:auto"><button class="pbtn" data-close="1">Fechar</button></span></div>`));return}
- const g=GAME[i];store.set('p_game'+i,{});
+ const g=GAME[i];store.set('p_game'+i,{});Live.clear('game'+i);
  Poll.open({id:'game'+i,kick:`Jogo · afirmação ${i+1} de ${GAME.length}`,title:'Evidência ou hipótese?',ctx:`<span style="font:700 52px/1.2 var(--bd)">“${g.s}”</span>`,opts:GAME_OPTS,correct:g.a,ans:g.why,ansT:'Resposta: '+GAME_OPTS[g.a]+'.',
   onReveal(c){const tot=c.reduce((a,b)=>a+b,0);if(tot){gameScore.n++;if(c.indexOf(Math.max(...c))===g.a&&c.filter(x=>x===Math.max(...c)).length===1)gameScore.ok++}},next:()=>gameAsk(i+1)});
 }
