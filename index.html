@@ -3274,7 +3274,7 @@ function fbAdapter(base){
   collection:p=>({onSnapshot:(cb,err)=>poll(p,cb,err,v=>({docs:Object.values(v||{}).map(d=>({data:()=>d}))}))})
  }}
 const Live={ready:false,presenter:false,db:null,uid:null,counts:{},unsub:null,
- async init(){if(typeof FB_URL==='string'&&FB_URL){try{this.db=fbAdapter(FB_URL);let id=null;try{id=localStorage.getItem('ie_uid')}catch(e){}if(!id){id='u'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);try{localStorage.setItem('ie_uid',id)}catch(e){}}this.uid=id;this.presenter=location.hash!=='#votar';this.ready=true;this.fb=true}catch(e){}return}
+ async init(){if(typeof FB_URL==='string'&&FB_URL){try{this.db=fbAdapter(FB_URL);let id=null;try{id=localStorage.getItem('ie_uid')}catch(e){}if(!id){id='u'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);try{localStorage.setItem('ie_uid',id)}catch(e){}}this.uid=id;this.presenter=(()=>{try{if(location.hash==='#votar')return false;if(location.hash==='#apresentador')localStorage.setItem('ie_pres','1');return localStorage.getItem('ie_pres')==='1'}catch(e){return location.hash==='#apresentador'}})();this.ready=true;this.fb=true}catch(e){}return}
   try{if(!window.claude||!window.claude.use)return;const db=await claude.use('db');if(!db)return;this.db=db;const user=await claude.use('user');
    if(user){this.uid=await user.id();this.presenter=!!(await user.canEdit())}this.ready=true}catch(e){}},
  publish(cfg){if(!this.ready||!this.presenter)return;this.stop(true);

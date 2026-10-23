@@ -26,8 +26,9 @@
 
 ## Limites e cuidados
 - Qualquer pessoa com o link do banco pode ler e gravar votos (é uma enquete aberta). Não coloque dados sensíveis.
-- Quem abrir o deck sem `#votar` age como apresentador: se abrir um dilema, troca a pergunta do público.
-  Divulgue só o QR, não o link do deck, durante a votação.
+- Só o navegador onde você abriu `.../#apresentador` (uma vez) controla a votação: troca a pergunta, vê o QR e zera votos.
+  Quem abrir o link base só vê o deck, sem controlar nada. Aos alunos, divulgue o link base (ler) e `.../#votar` (votar).
+  Em outro PC ou navegador, abra `.../#apresentador` uma vez antes da aula.
 - Para zerar votos antigos: Firebase > Data > apague o nó `votes`.
 - Sem `config.js` preenchido, o deck funciona normalmente com contagem manual.
 
