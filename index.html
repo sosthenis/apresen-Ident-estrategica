@@ -3202,30 +3202,31 @@ const store={get(k){return safe(()=>JSON.parse(localStorage.getItem('ie_'+k)),nu
 const Poll={cfg:null,manual:{},phase:'ask',
  open(cfg){this.cfg=cfg;this.manual=store.get('p_'+cfg.id)||{};this.phase='ask';this.draw();Live.publish(cfg)},
  total(i){return (this.manual[i]||0)+(Live.counts[i]||0)},
+ ro(){return !!(Live.ready&&!Live.presenter)},
  draw(){const c=this.cfg;if(!c)return;
-  const rev=this.phase==='rev';const tot=c.opts.reduce((s,_,i)=>s+this.total(i),0);const mx=Math.max(1,...c.opts.map((_,i)=>this.total(i)));
+  const rev=this.phase==='rev';const ro=this.ro();const tot=c.opts.reduce((s,_,i)=>s+this.total(i),0);const mx=Math.max(1,...c.opts.map((_,i)=>this.total(i)));
   const opts=c.opts.map((t,i)=>{const n=this.total(i);let cls='opt';if(rev&&c.correct!==undefined)cls+=(i===c.correct?' ok':' no');
    const pct=tot?Math.round(n/tot*100):0;const pv=c.prev?`<div style="font:600 24px var(--bd);color:#9fdce8;margin-top:8px">Antes: ${c.prev[i]||0}</div>`:'';
-   return `<button class="${cls}" data-k="${i}"><span class="L">${'ABCD'[i]}</span><div>${t}</div>${pv}<span class="cnt">${rev&&tot?pct+'%':n}</span><span class="bar" style="width:${rev?(n/mx*100):0}%"></span>${rev?'':'<span class="pm"><span data-d="-1">−</span><span data-d="1">+</span></span>'}</button>`}).join('');
+   return `<button class="${cls}" data-k="${i}"><span class="L">${'ABCD'[i]}</span><div>${t}</div>${pv}<span class="cnt">${rev&&tot?pct+'%':n}</span><span class="bar" style="width:${rev?(n/mx*100):0}%"></span>${rev||ro?'':'<span class="pm"><span data-d="-1">−</span><span data-d="1">+</span></span>'}</button>`}).join('');
   const ans=rev&&c.ans?`<div class="ans"><b>${c.ansT||'Análise:'}</b> ${c.ans}</div>`:'';
   const liveB=Live.ready&&Live.presenter?`<span class="live on"><span class="dot"></span>AO VIVO · ${Object.values(Live.counts).reduce((a,b)=>a+b,0)} pelo celular</span>`:'';
   const qr=Live.ready&&Live.presenter&&LIVE_URL?`<div style="position:absolute;right:130px;top:34px;width:150px;text-align:center;font:600 20px var(--bd);color:#bfe6f0"><div style="background:#fff;border-radius:10px;padding:4px">${qrSvg(LIVE_URL+'#votar','#082645')}</div>votar</div>`:'';
-  const btns=rev?`<button class="pbtn g" data-a="back">◂ Voltar</button>${c.next?'<button class="pbtn" data-a="next">Próxima ▸</button>':'<button class="pbtn" data-a="close">Fechar</button>'}`:`<button class="pbtn g" data-a="zero">Zerar</button><button class="pbtn" data-a="rev">Revelar ▸</button>`;
-  const hint=rev?'':`<span>Contagem manual: clique na opção ou tecle A–D (Shift = −1) · Enter revela</span>`;
+  const btns=ro?`<button class="pbtn" data-a="close">Fechar</button>`:rev?`<button class="pbtn g" data-a="back">◂ Voltar</button>${c.next?'<button class="pbtn" data-a="next">Próxima ▸</button>':'<button class="pbtn" data-a="close">Fechar</button>'}`:`<button class="pbtn g" data-a="zero">Zerar</button><button class="pbtn" data-a="rev">Revelar ▸</button>`;
+  const hint=ro?`<span>Modo leitura · o voto é feito pelo celular, no link da votação</span>`:rev?'':`<span>Contagem manual: clique na opção ou tecle A–D (Shift = −1) · Enter revela</span>`;
   const html=panelBase(c.kick,c.title,`<div class="ctx">${c.ctx}</div><div class="opts">${opts}</div>${ans}`,`${qr}<div class="pbar">${hint}${liveB}<span style="margin-left:auto;display:flex;gap:14px">${btns}</span></div>`);
   openOv(html);const pn=document.querySelector('#ov .panel');if(pn)pn.classList.toggle('rev',rev);
  },
  refresh(){if(this.cfg&&ovOpen)this.draw()},
- add(i,d){if(this.phase!=='ask'||i<0||i>=this.cfg.opts.length)return;this.manual[i]=Math.max(0,(this.manual[i]||0)+d);store.set('p_'+this.cfg.id,this.manual);this.draw()},
- reveal(){const c=this.cfg;this.phase='rev';this.draw();if(c.onReveal){const best=c.opts.map((_,i)=>this.total(i));c.onReveal(best)}},
- back(){this.phase='ask';this.draw()}
+ add(i,d){if(this.ro()||this.phase!=='ask'||i<0||i>=this.cfg.opts.length)return;this.manual[i]=Math.max(0,(this.manual[i]||0)+d);store.set('p_'+this.cfg.id,this.manual);this.draw()},
+ reveal(){if(this.ro())return;const c=this.cfg;this.phase='rev';this.draw();if(c.onReveal){const best=c.opts.map((_,i)=>this.total(i));c.onReveal(best)}},
+ back(){if(this.ro())return;this.phase='ask';this.draw()}
 };
 function pollEvents(e){
  const t=e.target.closest('[data-a],[data-close],.opt,[data-d]');if(!t)return;
  if(t.dataset.close){closeOverlay();return}
  if(!Poll.cfg)return;
  const a=t.dataset.a;
- if(a==='rev')Poll.reveal();else if(a==='back')Poll.back();else if(a==='zero'){Poll.manual={};store.set('p_'+Poll.cfg.id,{});Live.counts={};Poll.draw();Live.clear(Poll.cfg.id).then(()=>Poll.draw())}
+ if(a==='rev')Poll.reveal();else if(a==='back')Poll.back();else if(a==='zero'){if(Poll.ro())return;Poll.manual={};store.set('p_'+Poll.cfg.id,{});Live.counts={};Poll.draw();Live.clear(Poll.cfg.id).then(()=>Poll.draw())}
  else if(a==='close')closeOverlay();else if(a==='next'){const f=Poll.cfg.next;closeOverlay();f&&f()}
  else if(t.dataset.d){const o=t.closest('.opt');Poll.add(+o.dataset.k,+t.dataset.d)}
  else if(t.classList.contains('opt')&&Poll.phase==='ask')Poll.add(+t.dataset.k,1);
@@ -3283,6 +3284,7 @@ const Live={ready:false,presenter:false,db:null,uid:null,counts:{},unsub:null,
  async clear(pid){if(!this.fb||!this.presenter||!FB_URL)return;const b=FB_URL.replace(/\/+$/,'');try{const r=await fetch(b+'/votes.json',{cache:'no-store'});const v=(await r.json())||{};await Promise.all(Object.keys(v).filter(u=>v[u]&&typeof v[u]==='object'&&(pid in v[u])).map(u=>fetch(b+'/votes/'+u+'/'+pid+'.json',{method:'DELETE'})))}catch(e){}this.counts={}},
  stop(keep){if(this.unsub){this.unsub();this.unsub=null}this.counts={};if(!keep&&this.ready&&this.presenter)this.db.doc('live/current').set({pid:null,t:Date.now()}).catch(()=>{})}
 };
+function showMode(){try{if(location.hash==='#votar'||!Live.ready)return;const on=!!Live.presenter;const b=document.createElement('div');b.id='modebadge';b.textContent=on?'● APRESENTADOR':'○ SOMENTE LEITURA';b.style.cssText='position:fixed;left:10px;bottom:8px;z-index:99999;font:700 12px/1 system-ui,sans-serif;letter-spacing:.06em;padding:5px 9px;border-radius:999px;pointer-events:none;opacity:.85;color:#fff;background:'+(on?'#0a8f5a':'#5b6b7a');document.body.appendChild(b);setTimeout(()=>b.remove(),8000)}catch(e){}}
 async function audiencePage(){
  document.body.innerHTML=`<div id="aud"><h1>Votação</h1><div id="aq">Aguardando a próxima pergunta…</div><div id="ao"></div><p id="as"></p></div>`;
  const style=document.createElement('style');style.textContent=`html,body{overflow:auto;background:#082645;color:#fff}#aud{max-width:640px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-left)) 40px;font:500 20px/1.4 var(--bd)}#aud h1{font:800 40px var(--hd);text-transform:uppercase;color:#6fe3dc;margin:0 0 10px}#aq{font:700 26px/1.25 var(--bd);margin-bottom:18px}#ao button{display:block;width:100%;margin:0 0 12px;padding:18px 18px;border-radius:18px;border:2px solid #ffffff55;background:#ffffff14;color:#fff;font:600 21px/1.25 var(--bd);text-align:left}#ao button.sel{background:#00a3a3;border-color:#7cf0e6}#as{color:#9cc3d6;font-size:16px}`;document.head.appendChild(style);
@@ -3408,7 +3410,7 @@ function boot(){
  bus.init();
  const h=location.hash.replace('#','');const start=SL.findIndex(s=>s.id===h);
  mount(start>0?start:0,0,1);
- Live.init();
+ Live.init().then(showMode);
 }
 
 /* ===== Ciclos de planejamento: chips por slide + tabela de identidade (patch) ===== */
