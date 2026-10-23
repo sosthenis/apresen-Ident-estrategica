@@ -29,6 +29,7 @@
 - Só o navegador onde você abriu `.../#apresentador` (uma vez) controla a votação: troca a pergunta, vê o QR e zera votos.
   Quem abrir o link base só vê o deck, sem controlar nada. Aos alunos, divulgue o link base (ler) e `.../#votar` (votar).
   Em outro PC ou navegador, abra `.../#apresentador` uma vez antes da aula.
+- Na tela de leitura (link base) a turma vê o botão flutuante **🗳 Votar agora** sempre que você abre uma pergunta. Ele abre a tela de voto por cima do deck, sem sair dele. O link `.../#votar` continua funcionando sozinho.
 - Para zerar votos antigos: Firebase > Data > apague o nó `votes`.
 - Sem `config.js` preenchido, o deck funciona normalmente com contagem manual.
 
