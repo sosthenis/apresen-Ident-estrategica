@@ -3399,8 +3399,7 @@ function boot(){
  ov.addEventListener('click',pollEvents);
  stage.addEventListener('click',e=>{const nd=e.target.closest('.node[data-tip]');if(nd&&nd.classList.contains('on')&&!ovOpen&&!zoomOpen&&!laser){tipOpen(+nd.dataset.tip);return}const z=e.target.closest('.zm');if(z&&!ovOpen&&!zoomOpen&&!e.target.closest('button')&&!laser)zoomEl(z)});
  buildBar();fit();window.addEventListener('resize',fit);
- presenterMode=location.hash==='#apresentador';
- if(presenterMode){document.body.classList.add('pres');$('#notes').classList.remove('hide');$('#bar').classList.remove('hide')}
+ /* #apresentador: mesma tela do deck, sem painel lateral; o controle da votação vem da marca salva em Live.init */
  $('#bPrev').onclick=prev;$('#bNext').onclick=next;$('#bGrid').onclick=openGrid;$('#bMap').onclick=openMap;
  $('#bLaser').onclick=()=>setLaser(!laser);$('#bSpot').onclick=()=>setSpot(!spot);$('#bFs').onclick=toggleFs;$('#bHelp').onclick=()=>$('#help').classList.remove('hide');
  $('#closeHelp').onclick=()=>$('#help').classList.add('hide');$('#help').onclick=e=>{if(e.target.id==='help')$('#help').classList.add('hide')};
