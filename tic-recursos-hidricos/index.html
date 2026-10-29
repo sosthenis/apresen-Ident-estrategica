@@ -33,7 +33,7 @@ function render(){const q=$('#aq'),o=$('#ao');o.textContent='';
  if(!cur||!cur.pid){q.textContent='Aguardando a próxima pergunta…';return}
  q.textContent=cur.q||'';const open=cur.phase==='ask';
  (cur.opts||[]).forEach((txt,i)=>{const b=document.createElement('button');b.type='button';b.disabled=!open;if(mine[cur.pid]===i)b.className='sel';
-  const l=document.createElement('b');l.textContent='AB'[i]+' · ';b.append(l,document.createTextNode(txt));b.onclick=()=>vote(i);o.append(b)});
+  const l=document.createElement('b');l.textContent='ABCDEF'[i]+' · ';b.append(l,document.createTextNode(txt));b.onclick=()=>vote(i);o.append(b)});
  $('#as').textContent=open?(mine[cur.pid]===undefined?'':'Voto registrado. Você pode mudar até o apresentador revelar.'):'Votação encerrada. Aguarde a próxima rodada.'}
 async function vote(k){if(!cur||!cur.pid||cur.phase!=='ask'||busy)return;const pid=cur.pid;busy=true;const prev=mine[pid];mine={...mine,[pid]:k};render();
  try{const r=await fetch(url('votes/'+uid+'/'+pid),{method:'PUT',body:JSON.stringify(k)});if(!r.ok)throw 0;$('#as').textContent='Voto registrado. Você pode mudar até o apresentador revelar.'}
